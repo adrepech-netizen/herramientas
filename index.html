@@ -295,13 +295,32 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
     function render() {
         context.fillStyle = "rgba(255, 255, 255, 0.25)"; 
         context.fillRect(0, 0, width, height);
+
+        // --- INICIO LÓGICA DE PUNTOS INTELIGENTES ---
+        let baseSize = 6; 
+        const count = nodes.length;
+
+        // Reglas de ajuste: Más gente = Puntos más chicos
+        if (count > 50) baseSize = 5;
+        if (count > 150) baseSize = 4;
+        if (count > 400) baseSize = 3;
+        if (count > 800) baseSize = 2;
+
+        const isMobile = width < 768;
+        // Calcula el radio final para usarlo en todos los puntos
+        const finalRadius = isMobile ? Math.max(2, baseSize - 1.5) : baseSize;
+        // --- FIN LÓGICA DE PUNTOS INTELIGENTES ---
+
         let hoveredNode = null;
         nodes.forEach(node => {
             node.x += (node.targetX - node.x) * 0.06;
             node.y += (node.targetY - node.y) * 0.06;
-            const radio = width < 768 ? 3.5 : 5;
-            context.beginPath(); context.arc(node.x, node.y, radio, 0, 2 * Math.PI);
+            
+            context.beginPath(); 
+            // Usamos finalRadius en lugar del número fijo
+            context.arc(node.x, node.y, finalRadius, 0, 2 * Math.PI);
             context.fillStyle = node.color; context.fill();
+            
             if (mousePos) {
                 const dist = Math.hypot(mousePos.x - node.x, mousePos.y - node.y);
                 if (dist < 10) hoveredNode = node;
